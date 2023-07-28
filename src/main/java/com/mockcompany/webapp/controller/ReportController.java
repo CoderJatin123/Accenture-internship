@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,21 +64,16 @@ public class ReportController {
 
         response.getSearchTermHits().put("Cool", counted.size());
 
-
         response.setProductCount(count);
 
         List<ProductItem> allItems = entityManager.createQuery("SELECT item FROM ProductItem item").getResultList();
-        int kidCount = 0;
-        int perfectCount = 0;
+
         Pattern kidPattern = Pattern.compile("(.*)[kK][iI][dD][sS](.*)");
-        for (ProductItem item : allItems) {
-            if (kidPattern.matcher(item.getName()).matches() || kidPattern.matcher(item.getDescription()).matches()) {
-                kidCount += 1;
-            }
-            if (item.getName().toLowerCase().contains("perfect") || item.getDescription().toLowerCase().contains("perfect")) {
-                perfectCount += 1;
-            }
-        }
+        String query="perfect";
+
+        int kidCount = SearchService.searchService(allItems,query,false,kidPattern).get("kidCountList").size();
+        int perfectCount = SearchService.searchService(allItems,query,false,kidPattern).get("perfectCountList").size();
+
         response.getSearchTermHits().put("Kids", kidCount);
 
         response.getSearchTermHits().put("Amazing", entityManager.createQuery("SELECT item FROM ProductItem item where lower(concat(item.name, ' - ', item.description)) like '%amazing%'").getResultList().size());

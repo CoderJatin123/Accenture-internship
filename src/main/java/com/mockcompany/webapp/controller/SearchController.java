@@ -43,18 +43,19 @@ public class SearchController {
         Iterable<ProductItem> allItems = this.productItemRepository.findAll();
         List<ProductItem> itemList = new ArrayList<>();
 
-        // This is a loop that the code inside will execute on each of the items from the database.
-        for (ProductItem item : allItems) {
-
-            // TODO: Figure out if the item should be returned based on the query parameter!
-
-            //My work is here :)
-            boolean matchesSearch = item.getName().toLowerCase().contains(query.toLowerCase()) || item.getDescription().toLowerCase().contains(query.toLowerCase());
-
-            if(matchesSearch){
-            itemList.add(item);
-            }
+        boolean exactMatch = false;
+        if (query.startsWith("\"") && query.endsWith("\"")) {
+            exactMatch = true;
+            // Extract the quotes
+            query = query.substring(1, query.length() - 1);
+        } else {
+            // Handle case-insensitivity by converting to lowercase first
+            query = query.toLowerCase();
         }
+
+        // For each item... This is written for simplicity to be read/understood not necessarily maintain or extend
+        itemList=SearchService.searchService(allItems,query,false,null).get("perfectCountList");
+
         return itemList;
     }
 }
